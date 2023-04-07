@@ -8,6 +8,7 @@ from views import (
     get_all_orders,
     get_single_order,
     create_order,
+    delete_order,
     get_all_sizes,
     get_single_size
 )
@@ -94,6 +95,21 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_PUT(self):
         """Handles PUT requests to the server """
         self.do_POST()
+
+    def do_DELETE(self):
+        """Handles DELETE requests to server"""
+        # set a 204 response code
+        self._set_headers(204)
+
+        # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+        # Delete a single order from the list
+        if resource == "orders":
+            delete_order(id)
+
+        # Encode the new order and send in a response
+        self.wfile.write("".encode())
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin

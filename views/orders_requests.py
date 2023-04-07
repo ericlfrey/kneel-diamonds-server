@@ -1,10 +1,10 @@
 ORDERS = [
     {
         "id": 1,
-        "metalId": 3,
-        "sizeId": 2,
-        "styleId": 3,
-        "jewelryId": 2,
+        "metal_id": 3,
+        "size_id": 2,
+        "style_id": 3,
+        "jewelry_id": 2,
         "timestamp": 1614659931693
     }
 ]

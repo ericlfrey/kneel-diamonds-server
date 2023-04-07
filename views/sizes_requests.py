@@ -41,3 +41,49 @@ def get_single_size(id):
             requested_size = size
 
     return requested_size
+
+
+def create_size(size):
+    """Creates a new size"""
+    # Get the id value of the last size in the list
+    max_id = SIZES[-1]["id"]
+
+    # Add 1 to whatever that number is
+    new_id = max_id + 1
+
+    # Add an `id` property to the size dictionary
+    size["id"] = new_id
+
+    # Add the size dictionary to the list
+    SIZES.append(size)
+
+    # Return the dictionary with `id` property added
+    return size
+
+
+def delete_size(id):
+    """Deletes single size"""
+    # Initial -1 value for size index, in case one isn't found
+    size_index = -1
+
+    # Iterate the SIZES list, but use enumerate() so that you
+    # can access the index value of each item
+    for index, size in enumerate(SIZES):
+        if size["id"] == id:
+            # Found the size. Store the current index.
+            size_index = index
+
+    # If the size was found, use pop(int) to remove it from list
+    if size_index >= 0:
+        SIZES.pop(size_index)
+
+
+def update_size(id, new_size):
+    """Updates size with Replacement"""
+    # Iterate the SIZES list, but use enumerate() so that
+    # you can access the index value of each item.
+    for index, size in enumerate(SIZES):
+        if size["id"] == id:
+            # Found the size. Update the value.
+            SIZES[index] = new_size
+            break

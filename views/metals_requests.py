@@ -30,3 +30,19 @@ METALS = [
 def get_all_metals():
     """Handles Server request for all METALS"""
     return METALS
+
+
+def get_single_metal(id):
+    """gets a single metal"""
+    # Variable to hold the found metal, if it exists
+    requested_metal = None
+
+    # Iterate the METALS list above. Very similar to the
+    # for..of loops you used in JavaScript.
+    for metal in METALS:
+        # Dictionaries in Python use [] notation to find a key
+        # instead of the dot notation that JavaScript used.
+        if metal["id"] == id:
+            requested_metal = metal
+
+    return requested_metal

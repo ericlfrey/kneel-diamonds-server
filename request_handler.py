@@ -1,26 +1,79 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from views import get_all_metals, get_all_styles, get_all_orders, get_all_sizes
+from views import (
+    get_all_metals,
+    get_single_metal,
+    get_all_styles,
+    get_single_style,
+    get_all_orders,
+    get_single_order,
+    get_all_sizes,
+    get_single_size
+)
 
 
 class HandleRequests(BaseHTTPRequestHandler):
     """Controls the functionality of any GET, PUT, POST, DELETE requests to the server
     """
 
+    def parse_url(self, path):
+        """This function splits the client path string into parts to isolate the requested id"""
+        path_params = path.split("/")
+        resource = path_params[1]
+        id = None
+
+        try:
+            id = int(path_params[2])
+        except IndexError:
+            pass
+        except ValueError:
+            pass
+
+        return (resource, id)  # This is a tuple
+
     def do_GET(self):
         """Handles GET requests to the server """
         self._set_headers(200)
 
-        if self.path == "/metals":
-            response = get_all_metals()
-        elif self.path == "/orders":
-            response = get_all_orders()
-        elif self.path == "/sizes":
-            response = get_all_sizes()
-        elif self.path == "/styles":
-            response = get_all_styles()
-        else:
-            response = []
+        response = {}  # Default response
+
+        # Parse the URL and capture the tuple that is returned
+        (resource, id) = self.parse_url(self.path)
+
+        if resource == "metals":
+            if id is not None:
+                response = get_single_metal(id)
+            else:
+                response = get_all_metals()
+
+        if resource == "orders":
+            if id is not None:
+                response = get_single_order(id)
+            else:
+                response = get_all_orders()
+
+        if resource == "sizes":
+            if id is not None:
+                response = get_single_size(id)
+            else:
+                response = get_all_sizes()
+
+        if resource == "styles":
+            if id is not None:
+                response = get_single_style(id)
+            else:
+                response = get_all_styles()
+
+        # if self.path == "/metals":
+        #     response = get_all_metals()
+        # elif self.path == "/orders":
+        #     response = get_all_orders()
+        # elif self.path == "/sizes":
+        #     response = get_all_sizes()
+        # elif self.path == "/styles":
+        #     response = get_all_styles()
+        # else:
+        #     response = []
 
         self.wfile.write(json.dumps(response).encode())
 

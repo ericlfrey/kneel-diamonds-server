@@ -46,3 +46,49 @@ def get_single_metal(id):
             requested_metal = metal
 
     return requested_metal
+
+
+def create_metal(metal):
+    """Creates a new metal"""
+    # Get the id value of the last metal in the list
+    max_id = METALS[-1]["id"]
+
+    # Add 1 to whatever that number is
+    new_id = max_id + 1
+
+    # Add an `id` property to the metal dictionary
+    metal["id"] = new_id
+
+    # Add the metal dictionary to the list
+    METALS.append(metal)
+
+    # Return the dictionary with `id` property added
+    return metal
+
+
+def delete_metal(id):
+    """Deletes single metal"""
+    # Initial -1 value for metal index, in case one isn't found
+    metal_index = -1
+
+    # Iterate the METALS list, but use enumerate() so that you
+    # can access the index value of each item
+    for index, metal in enumerate(METALS):
+        if metal["id"] == id:
+            # Found the metal. Store the current index.
+            metal_index = index
+
+    # If the metal was found, use pop(int) to remove it from list
+    if metal_index >= 0:
+        METALS.pop(metal_index)
+
+
+def update_metal(id, new_metal):
+    """Updates metal with Replacement"""
+    # Iterate the METALS list, but use enumerate() so that
+    # you can access the index value of each item.
+    for index, metal in enumerate(METALS):
+        if metal["id"] == id:
+            # Found the metal. Update the value.
+            METALS[index] = new_metal
+            break

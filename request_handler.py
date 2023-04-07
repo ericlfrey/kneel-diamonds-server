@@ -3,15 +3,24 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from views import (
     get_all_metals,
     get_single_metal,
+    create_metal,
+    delete_metal,
+    update_metal,
     get_all_styles,
     get_single_style,
+    create_style,
+    delete_style,
+    update_style,
     get_all_orders,
     get_single_order,
     create_order,
     delete_order,
     update_order,
     get_all_sizes,
-    get_single_size
+    get_single_size,
+    create_size,
+    delete_size,
+    update_size
 )
 
 
@@ -83,15 +92,28 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         # Initialize new order
         new_order = None
+        new_metal = None
+        new_size = None
+        new_style = None
 
         # Add a new order to the list. Don't worry about
         # the orange squiggle, you'll define the create_order
         # function next.
         if resource == "orders":
             new_order = create_order(post_body)
+            self.wfile.write(json.dumps(new_order).encode())
 
-        # Encode the new order and send in response
-        self.wfile.write(json.dumps(new_order).encode())
+        if resource == "metals":
+            new_metal = create_metal(post_body)
+            self.wfile.write(json.dumps(new_metal).encode())
+
+        if resource == "sizes":
+            new_size = create_size(post_body)
+            self.wfile.write(json.dumps(new_size).encode())
+
+        if resource == "styles":
+            new_style = create_style(post_body)
+            self.wfile.write(json.dumps(new_style).encode())
 
     def do_PUT(self):
         """Handles PUT requests to the server """
@@ -106,6 +128,12 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Update a single order in the list
         if resource == "orders":
             update_order(id, post_body)
+        if resource == "metals":
+            update_metal(id, post_body)
+        if resource == "sizes":
+            update_size(id, post_body)
+        if resource == "styles":
+            update_style(id, post_body)
 
         # Encode the order and send in response
         self.wfile.write("".encode())
@@ -121,6 +149,12 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Delete a single order from the list
         if resource == "orders":
             delete_order(id)
+        if resource == "metals":
+            delete_metal(id)
+        if resource == "sizes":
+            delete_size(id)
+        if resource == "styles":
+            delete_style(id)
 
         # Encode the new order and send in a response
         self.wfile.write("".encode())

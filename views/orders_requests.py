@@ -13,3 +13,14 @@ ORDERS = [
 def get_all_orders():
     """Handles Server request for all ORDERS"""
     return ORDERS
+
+
+def get_single_order(id):
+    """gets a single order"""
+    requested_order = None
+
+    for order in ORDERS:
+        if order["id"] == id:
+            requested_order = order
+
+    return requested_order

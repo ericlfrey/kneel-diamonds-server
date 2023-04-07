@@ -20,3 +20,14 @@ STYLES = [
 def get_all_styles():
     """Handles Server request for all STYLES"""
     return STYLES
+
+
+def get_single_style(id):
+    """gets a single style"""
+    requested_style = None
+
+    for style in STYLES:
+        if style["id"] == id:
+            requested_style = style
+
+    return requested_style

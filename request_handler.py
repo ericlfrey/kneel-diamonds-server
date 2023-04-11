@@ -62,6 +62,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                     self._set_headers(404)
                     response = "message: That metal is not currently in stock for jewelry"
             else:
+                self._set_headers(200)
                 response = get_all_metals()
 
         if resource == "orders":
@@ -74,6 +75,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                     self._set_headers(404)
                     response = "message: That order is not currently in stock for jewelry"
             else:
+                self._set_headers(200)
                 response = get_all_orders()
 
         if resource == "sizes":
@@ -86,6 +88,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                     self._set_headers(404)
                     response = "message: That size is not currently in stock for jewelry"
             else:
+                self._set_headers(200)
                 response = get_all_sizes()
 
         if resource == "styles":
@@ -98,6 +101,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                     self._set_headers(404)
                     response = "message: That style is not currently in stock for jewelry"
             else:
+                self._set_headers(200)
                 response = get_all_styles()
 
         self.wfile.write(json.dumps(response).encode())
@@ -124,19 +128,52 @@ class HandleRequests(BaseHTTPRequestHandler):
         # the orange squiggle, you'll define the create_order
         # function next.
         if resource == "orders":
-            new_order = create_order(post_body)
+            orders_list = ["metal_id", "size_id",
+                           "style_id", "jewelry_id", "timestamp"]
+            if all(orders_list_item in post_body for orders_list_item in orders_list):
+                self._set_headers(201)
+                new_order = create_order(post_body)
+            else:
+                self._set_headers(400)
+                new_order = {
+                    "message": f"{'metal_id is required' if 'metal_id' not in post_body else ''}{'size_id is required' if 'size_id' not in post_body else ''}{'style_id is required' if 'style_id' not in post_body else ''}{'jewelry_id is required' if 'jewelry_id' not in post_body else ''}{'timestamp is required' if 'timestamp' not in post_body else ''}"
+                }
             self.wfile.write(json.dumps(new_order).encode())
 
         if resource == "metals":
-            new_metal = create_metal(post_body)
+            metals_list = ["metal", "price"]
+            if all(metals_list_item in post_body for metals_list_item in metals_list):
+                self._set_headers(201)
+                new_metal = create_metal(post_body)
+            else:
+                self._set_headers(400)
+                new_metal = {
+                    "message": f"{'metal is required' if 'metal' not in post_body else ''}{'price is required' if 'price' not in post_body else ''}"
+                }
             self.wfile.write(json.dumps(new_metal).encode())
 
         if resource == "sizes":
-            new_size = create_size(post_body)
+            sizes_list = ["carets", "price"]
+            if all(sizes_list_item in post_body for sizes_list_item in sizes_list):
+                self._set_headers(201)
+                new_size = create_size(post_body)
+            else:
+                self._set_headers(400)
+                new_size = {
+                    "message": f"{'carets is required' if 'carets' not in post_body else ''}{'price is required' if 'price' not in post_body else ''}"
+                }
             self.wfile.write(json.dumps(new_size).encode())
 
         if resource == "styles":
-            new_style = create_style(post_body)
+            styles_list = ["style", "price"]
+            if all(styles_list_item in post_body for styles_list_item in styles_list):
+                self._set_headers(201)
+                new_style = create_style(post_body)
+            else:
+                self._set_headers(400)
+                new_style = {
+                    "message": f"{'style is required' if 'style' not in post_body else ''}{'price is required' if 'price' not in post_body else ''}"
+                }
             self.wfile.write(json.dumps(new_style).encode())
 
     def do_PUT(self):

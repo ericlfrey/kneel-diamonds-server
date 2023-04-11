@@ -14,7 +14,7 @@ from views import (
     get_all_orders,
     get_single_order,
     create_order,
-    delete_order,
+    # delete_order,
     update_order,
     get_all_sizes,
     get_single_size,
@@ -201,24 +201,29 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         """Handles DELETE requests to server"""
-        # set a 204 response code
-        self._set_headers(204)
 
         # Parse the URL
         (resource, id) = self.parse_url(self.path)
 
         # Delete a single order from the list
         if resource == "orders":
-            delete_order(id)
+            self._set_headers(405)
+            error_message = {
+                "message": "Deleting orders requires contacting the company directly."
+            }
+            self.wfile.write(json.dumps(error_message).encode())
         if resource == "metals":
+            self._set_headers(204)
             delete_metal(id)
+            self.wfile.write("".encode())
         if resource == "sizes":
+            self._set_headers(204)
             delete_size(id)
+            self.wfile.write("".encode())
         if resource == "styles":
+            self._set_headers(204)
             delete_style(id)
-
-        # Encode the new order and send in a response
-        self.wfile.write("".encode())
+            self.wfile.write("".encode())
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin

@@ -1,3 +1,7 @@
+from .metals_requests import get_single_metal
+from .sizes_requests import get_single_size
+from .styles_requests import get_single_style
+
 ORDERS = [
     {
         "id": 1,
@@ -21,7 +25,22 @@ def get_single_order(id):
 
     for order in ORDERS:
         if order["id"] == id:
-            requested_order = order
+            requested_order = order.copy()
+
+            matching_metal = get_single_metal(requested_order["metal_id"])
+            matching_size = get_single_size(requested_order["size_id"])
+            matching_style = get_single_style(requested_order["style_id"])
+
+            requested_order["metal"] = matching_metal
+            requested_order["size"] = matching_size
+            requested_order["style"] = matching_style
+
+            if matching_metal is not None:
+                del requested_order["metal_id"]
+            if matching_size is not None:
+                del requested_order["size_id"]
+            if matching_style is not None:
+                del requested_order["style_id"]
 
     return requested_order
 

@@ -45,7 +45,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Handles GET requests to the server """
-        self._set_headers(200)
+        # self._set_headers(200)
 
         response = {}  # Default response
 
@@ -55,24 +55,48 @@ class HandleRequests(BaseHTTPRequestHandler):
         if resource == "metals":
             if id is not None:
                 response = get_single_metal(id)
+
+                if response is not None:
+                    self._set_headers(200)
+                else:
+                    self._set_headers(404)
+                    response = "message: That metal is not currently in stock for jewelry"
             else:
                 response = get_all_metals()
 
         if resource == "orders":
             if id is not None:
                 response = get_single_order(id)
+
+                if response is not None:
+                    self._set_headers(200)
+                else:
+                    self._set_headers(404)
+                    response = "message: That order is not currently in stock for jewelry"
             else:
                 response = get_all_orders()
 
         if resource == "sizes":
             if id is not None:
                 response = get_single_size(id)
+
+                if response is not None:
+                    self._set_headers(200)
+                else:
+                    self._set_headers(404)
+                    response = "message: That size is not currently in stock for jewelry"
             else:
                 response = get_all_sizes()
 
         if resource == "styles":
             if id is not None:
                 response = get_single_style(id)
+
+                if response is not None:
+                    self._set_headers(200)
+                else:
+                    self._set_headers(404)
+                    response = "message: That style is not currently in stock for jewelry"
             else:
                 response = get_all_styles()
 
@@ -80,7 +104,7 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Handles POST requests to the server """
-        self._set_headers(201)
+        # self._set_headers(201)
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
 

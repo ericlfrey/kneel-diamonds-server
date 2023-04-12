@@ -21,28 +21,28 @@ def get_all_orders():
 
 def get_single_order(id):
     """gets a single order"""
-    requested_order = None
+    # requested_order = None
 
-    for order in ORDERS:
-        if order["id"] == id:
-            requested_order = order.copy()
+    # for order in ORDERS:
+    #     if order["id"] == id:
+    #         requested_order = order.copy()
 
-            matching_metal = get_single_metal(requested_order["metal_id"])
-            matching_size = get_single_size(requested_order["size_id"])
-            matching_style = get_single_style(requested_order["style_id"])
+    #         matching_metal = get_single_metal(requested_order["metal_id"])
+    #         matching_size = get_single_size(requested_order["size_id"])
+    #         matching_style = get_single_style(requested_order["style_id"])
 
-            requested_order["metal"] = matching_metal
-            requested_order["size"] = matching_size
-            requested_order["style"] = matching_style
+    #         requested_order["metal"] = matching_metal
+    #         requested_order["size"] = matching_size
+    #         requested_order["style"] = matching_style
 
-            if matching_metal is not None:
-                del requested_order["metal_id"]
-            if matching_size is not None:
-                del requested_order["size_id"]
-            if matching_style is not None:
-                del requested_order["style_id"]
+    #         if matching_metal is not None:
+    #             del requested_order["metal_id"]
+    #         if matching_size is not None:
+    #             del requested_order["size_id"]
+    #         if matching_style is not None:
+    #             del requested_order["style_id"]
 
-    return requested_order
+    # return requested_order
 
 
 def create_order(order):

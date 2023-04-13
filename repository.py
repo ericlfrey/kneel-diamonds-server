@@ -99,28 +99,39 @@ def retrieve(db_key, id):
     return requested_dict
 
 
-def get_single_order(id):
+def get_single_order(id, query_params):
     """gets a single order"""
     requested_order = None
-
     for order in DATABASE["ORDERS"]:
         if order["id"] == id:
             requested_order = order.copy()
             resources = ["metals", "sizes", "styles"]
-            query_params = ["metal_id", "size_id", "style_id"]
+            foreign_keys = ["metal_id", "size_id", "style_id"]
+            # resources_fks = {
+            #     "metals": "metal_id",
+            #     "sizes": "size_id",
+            #     "styles": "style_id"
+            # }
+            # if len(query_params) > 0:
+            #     searched_params = {
+            #         res in resources_fks[res] for res in query_params if res in resources_fks[res]}
+            #     print(f"SEARCHED {searched_params}")
+
+            # for param in query_params:
+            #     if param
 
             price = 0
             for index, resource in enumerate(resources):
                 # gets corresponding resources by foreign keys
                 matching_resource = retrieve(
-                    resource, requested_order[query_params[index]])
+                    resource, requested_order[foreign_keys[index]])
                 # sets them inside the order dictionary
                 requested_order[resource] = matching_resource
                 # gets the prices from the corresponding resources and adds them
                 price += requested_order[resource]["price"]
                 requested_order["price"] = price
 
-            for param in query_params:
+            for param in foreign_keys:
                 if param is not None:
                     del requested_order[param]
 

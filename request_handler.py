@@ -11,8 +11,11 @@ class HandleRequests(BaseHTTPRequestHandler):
     def parse_url(self, path):
         """This function splits the client path string into parts to isolate the requested id"""
         url_components = urlparse(path)
+        print(f"URL {url_components}")
         path_params = url_components.path.strip("/").split("/")
+        print(f"PATH {path_params}")
         query_params = url_components.query.split("&")
+        print(f"QUERY {query_params}")
         resource = path_params[0]
         id = None
 
@@ -25,14 +28,14 @@ class HandleRequests(BaseHTTPRequestHandler):
 
         return (resource, id, query_params)
 
-    def get_all_or_single(self, resource, id):
+    def get_all_or_single(self, resource, id, query_params):
         """Tests whether to get All items, or get Single item"""
         if id is not None:
             response = retrieve(resource, id)
             if response is not None:
                 self._set_headers(200)
                 if resource == "orders":
-                    response = get_single_order(id)
+                    response = get_single_order(id, query_params)
             else:
                 self._set_headers(404)
                 response = ''
@@ -46,7 +49,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         """Handles GET requests to the server """
         response = None
         (resource, id, query_params) = self.parse_url(self.path)
-        response = self.get_all_or_single(resource, id)
+        response = self.get_all_or_single(resource, id, query_params)
         self.wfile.write(json.dumps(response).encode())
 
     def do_POST(self):

@@ -105,8 +105,33 @@ def get_single_order(id, query_params):
     for order in DATABASE["ORDERS"]:
         if order["id"] == id:
             requested_order = order.copy()
-            resources = ["metals", "sizes", "styles"]
-            foreign_keys = ["metal_id", "size_id", "style_id"]
+    if query_params is not None:
+        for param in query_params:
+            with_id = param + "_id"
+            if param or with_id in requested_order:
+                        #then i want to expand the order on the fk
+
+                        #get the fk
+                fk = requested_order[with_id]
+                        #get the resource
+                database_key = param + "S"
+                resource = retrieve(database_key, fk)
+                        #add the resource to the order
+                requested_order[param] = resource
+                del requested_order[with_id]
+
+            # # get the foreign keys
+
+
+
+
+
+
+
+
+
+            # resources = ["metals", "sizes", "styles"]
+            # foreign_keys = ["metal_id", "size_id", "style_id"]
             # resources_fks = {
             #     "metals": "metal_id",
             #     "sizes": "size_id",
@@ -117,23 +142,23 @@ def get_single_order(id, query_params):
             #         res in resources_fks[res] for res in query_params if res in resources_fks[res]}
             #     print(f"SEARCHED {searched_params}")
 
-            # for param in query_params:
-            #     if param
+            # # for param in query_params:
+            # #     if param
 
-            price = 0
-            for index, resource in enumerate(resources):
-                # gets corresponding resources by foreign keys
-                matching_resource = retrieve(
-                    resource, requested_order[foreign_keys[index]])
-                # sets them inside the order dictionary
-                requested_order[resource] = matching_resource
-                # gets the prices from the corresponding resources and adds them
-                price += requested_order[resource]["price"]
-                requested_order["price"] = price
+            # price = 0
+            # for index, resource in enumerate(resources):
+            #     # gets corresponding resources by foreign keys
+            #     matching_resource = retrieve(
+            #         resource, requested_order[foreign_keys[index]])
+            #     # sets them inside the order dictionary
+            #     requested_order[resource] = matching_resource
+            #     # gets the prices from the corresponding resources and adds them
+            #     price += requested_order[resource]["price"]
+            #     requested_order["price"] = price
 
-            for param in foreign_keys:
-                if param is not None:
-                    del requested_order[param]
+            # for param in foreign_keys:
+            #     if param is not None:
+            #         del requested_order[param]
 
     return requested_order
 

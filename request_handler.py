@@ -30,19 +30,22 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def get_all_or_single(self, resource, id, query_params):
         """Tests whether to get All items, or get Single item"""
+
+
+# had to change this, it was retrieving AND getting single order
+
         if id is not None:
-            response = retrieve(resource, id)
-            if response is not None:
-                self._set_headers(200)
                 if resource == "orders":
                     response = get_single_order(id, query_params)
-            else:
-                self._set_headers(404)
-                response = ''
+                else:
+                    response = retrieve(resource, id)
         else:
-            self._set_headers(200)
             response = get_all(resource)
-
+        if response is not None:
+                self._set_headers(200)
+        else:
+            self._set_headers(404)
+            response = {"message": "Not found"}
         return response
 
     def do_GET(self):

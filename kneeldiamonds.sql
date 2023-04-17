@@ -62,3 +62,24 @@ FROM orders o
 WHERE o.id = 2
 
 SELECT * FROM Orders
+
+SELECT
+            o.id,
+            o.metal_id,
+            o.size_id,
+            o.style_id,
+            o.jewelry_id,
+            o.timestamp,
+            m.metal metal_name,
+            m.price metal_price,
+            sz.carets size_carets,
+            sz.price size_price,
+            st.style style_name,
+            st.price style_price
+        FROM Orders o
+        JOIN Metals m
+            ON m.id = o.metal_id
+        JOIN Sizes sz
+            ON sz.id = o.size_id
+        JOIN Styles st
+            ON st.id = o.style_id

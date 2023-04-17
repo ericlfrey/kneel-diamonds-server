@@ -60,7 +60,7 @@ def get_all_orders():
                           row['style_id'], row['jewelry_id'], row['timestamp'])
 
             metal = Metal(
-                row['location_id'], row['metal_name'], row['metal_price'])
+                row['metal_id'], row['metal_name'], row['metal_price'])
             size = Size(
                 row['size_id'], row['size_carets'], row['size_price'])
             style = Style(

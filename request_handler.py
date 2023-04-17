@@ -1,27 +1,7 @@
 import json
+from urllib.parse import urlparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from views import (
-    get_all_metals,
-    get_single_metal,
-    create_metal,
-    delete_metal,
-    update_metal,
-    get_all_styles,
-    get_single_style,
-    create_style,
-    delete_style,
-    update_style,
-    get_all_orders,
-    get_single_order,
-    create_order,
-    delete_order,
-    update_order,
-    get_all_sizes,
-    get_single_size,
-    create_size,
-    delete_size,
-    update_size
-)
+from repository import (get_all, retrieve, update, create, get_single_order)
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -30,134 +10,112 @@ class HandleRequests(BaseHTTPRequestHandler):
 
     def parse_url(self, path):
         """This function splits the client path string into parts to isolate the requested id"""
-        path_params = path.split("/")
-        resource = path_params[1]
+        url_components = urlparse(path)
+        print(f"URL {url_components}")
+        path_params = url_components.path.strip("/").split("/")
+        print(f"PATH {path_params}")
+        query_params = url_components.query.split("&")
+        print(f"QUERY {query_params}")
+        resource = path_params[0]
         id = None
 
         try:
-            id = int(path_params[2])
+            id = int(path_params[1])
         except IndexError:
             pass
         except ValueError:
             pass
 
-        return (resource, id)  # This is a tuple
+        return (resource, id, query_params)
+
+    def get_all_or_single(self, resource, id, query_params):
+        """Tests whether to get All items, or get Single item"""
+        if id is not None:
+            if resource == "orders":
+                response = get_single_order(id, query_params)
+            else:
+                response = retrieve(resource, id)
+        else:
+            response = get_all(resource)
+        if response is not None:
+            self._set_headers(200)
+        else:
+            self._set_headers(404)
+            response = {"message": "Not found"}
+        return response
 
     def do_GET(self):
         """Handles GET requests to the server """
-        self._set_headers(200)
-
-        response = {}  # Default response
-
-        # Parse the URL and capture the tuple that is returned
-        (resource, id) = self.parse_url(self.path)
-
-        if resource == "metals":
-            if id is not None:
-                response = get_single_metal(id)
-            else:
-                response = get_all_metals()
-
-        if resource == "orders":
-            if id is not None:
-                response = get_single_order(id)
-            else:
-                response = get_all_orders()
-
-        if resource == "sizes":
-            if id is not None:
-                response = get_single_size(id)
-            else:
-                response = get_all_sizes()
-
-        if resource == "styles":
-            if id is not None:
-                response = get_single_style(id)
-            else:
-                response = get_all_styles()
-
+        response = None
+        (resource, id, query_params) = self.parse_url(self.path)
+        response = self.get_all_or_single(resource, id, query_params)
         self.wfile.write(json.dumps(response).encode())
 
     def do_POST(self):
         """Handles POST requests to the server """
-        self._set_headers(201)
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
-
-        # Convert JSON string to a Python dictionary
         post_body = json.loads(post_body)
-
-        # Parse the URL
-        (resource, id) = self.parse_url(self.path)
-
-        # Initialize new order
+        (resource, id, query_params) = self.parse_url(self.path)
         new_order = None
-        new_metal = None
-        new_size = None
-        new_style = None
 
-        # Add a new order to the list. Don't worry about
-        # the orange squiggle, you'll define the create_order
-        # function next.
         if resource == "orders":
-            new_order = create_order(post_body)
+            orders_list = (["metal_id",
+                            "size_id",
+                            "style_id",
+                            "jewelry_id",
+                            "timestamp"])
+            if all(orders_list_item in post_body for orders_list_item in orders_list):
+                self._set_headers(201)
+                new_order = create(post_body, resource)
+            else:
+                self._set_headers(400)
+                key_list = [
+                    key_item for key_item in orders_list if key_item not in post_body]
+                key_string = ', '.join([str(item) for item in key_list])
+                new_order = {
+                    "message": f"{key_string} is required"
+                }
             self.wfile.write(json.dumps(new_order).encode())
-
-        if resource == "metals":
-            new_metal = create_metal(post_body)
-            self.wfile.write(json.dumps(new_metal).encode())
-
-        if resource == "sizes":
-            new_size = create_size(post_body)
-            self.wfile.write(json.dumps(new_size).encode())
-
-        if resource == "styles":
-            new_style = create_style(post_body)
-            self.wfile.write(json.dumps(new_style).encode())
+        else:
+            self._set_headers(405)
+            error_message = {
+                "message": "That function is not allowed."
+            }
+            self.wfile.write(json.dumps(error_message).encode())
 
     def do_PUT(self):
         """Handles PUT requests to the server """
-        self._set_headers(204)
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
         post_body = json.loads(post_body)
+        (resource, id, query_params) = self.parse_url(self.path)
 
-        # Parse the URL
-        (resource, id) = self.parse_url(self.path)
-
-        # Update a single order in the list
-        if resource == "orders":
-            update_order(id, post_body)
         if resource == "metals":
-            update_metal(id, post_body)
-        if resource == "sizes":
-            update_size(id, post_body)
-        if resource == "styles":
-            update_style(id, post_body)
-
-        # Encode the order and send in response
-        self.wfile.write("".encode())
+            metal_dict = retrieve(resource, id)
+            if post_body["metal"] == metal_dict["metal"]:
+                self._set_headers(204)
+                update(id, post_body, resource)
+                self.wfile.write("".encode())
+            else:
+                self._set_headers(405)
+                error_message = {"message": "Only price can be updated."}
+                self.wfile.write(json.dumps(error_message).encode())
+        else:
+            self._set_headers(405)
+            error_message = {
+                "message": "That function is not allowed."
+            }
+            self.wfile.write(json.dumps(error_message).encode())
 
     def do_DELETE(self):
         """Handles DELETE requests to server"""
-        # set a 204 response code
-        self._set_headers(204)
-
-        # Parse the URL
-        (resource, id) = self.parse_url(self.path)
-
-        # Delete a single order from the list
-        if resource == "orders":
-            delete_order(id)
-        if resource == "metals":
-            delete_metal(id)
-        if resource == "sizes":
-            delete_size(id)
-        if resource == "styles":
-            delete_style(id)
-
-        # Encode the new order and send in a response
-        self.wfile.write("".encode())
+        (resource, id, query_params) = self.parse_url(self.path)
+        self._set_headers(405)
+        error_message = {
+            "message": f"Deleting {resource.lower()} requires contacting the company directly."
+        }
+        self.wfile.write(json.dumps(error_message).encode())
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin

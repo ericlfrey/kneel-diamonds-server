@@ -1,8 +1,8 @@
 import json
 from urllib.parse import urlparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from repository import (get_all, retrieve, update, create)
-from views import get_all_orders, get_single_order, create_order
+from repository import (get_all, retrieve, update)
+from views import get_all_orders, get_single_order, create_order, delete_order
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -115,11 +115,16 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_DELETE(self):
         """Handles DELETE requests to server"""
         (resource, id, query_params) = self.parse_url(self.path)
-        self._set_headers(405)
-        error_message = {
-            "message": f"Deleting {resource.lower()} requires contacting the company directly."
-        }
-        self.wfile.write(json.dumps(error_message).encode())
+        if resource == "orders":
+            self._set_headers(204)
+            delete_order(id)
+            self.wfile.write("".encode())
+        else:
+            self._set_headers(405)
+            error_message = {
+                "message": f"Deleting {resource.lower()} requires contacting the company directly."
+            }
+            self.wfile.write(json.dumps(error_message).encode())
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin

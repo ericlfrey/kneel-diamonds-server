@@ -2,7 +2,7 @@ import json
 from urllib.parse import urlparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from repository import (get_all, retrieve, update, create)
-from views import get_all_orders, get_single_order
+from views import get_all_orders, get_single_order, create_order
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -71,7 +71,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                             "timestamp"])
             if all(orders_list_item in post_body for orders_list_item in orders_list):
                 self._set_headers(201)
-                new_order = create(post_body, resource)
+                new_order = create_order(post_body)
             else:
                 self._set_headers(400)
                 key_list = [

@@ -126,22 +126,45 @@ def get_single_order(id):
     # return requested_order
 
 
-def create_order(order):
+def create_order(new_order):
     """Creates a new order"""
-    # Get the id value of the last order in the list
-    max_id = ORDERS[-1]["id"]
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+        db_cursor = conn.cursor()
 
-    # Add 1 to whatever that number is
-    new_id = max_id + 1
+        db_cursor.execute("""
+        INSERT INTO Orders
+            ( metal_id, size_id, style_id, jewelry_id, timestamp )
+        VALUES
+            ( ?, ?, ?, ?, ?);
+        """, (new_order['metal_id'], new_order['size_id'],
+              new_order['style_id'], new_order['jewelry_id'], new_order['timestamp'], ))
 
-    # Add an `id` property to the order dictionary
-    order["id"] = new_id
+        # The `lastrowid` property on the cursor will return
+        # the primary key of the last thing that got added to
+        # the database.
+        id = db_cursor.lastrowid
 
-    # Add the order dictionary to the list
-    ORDERS.append(order)
+        # Add the `id` property to the animal dictionary that
+        # was sent by the client so that the client sees the
+        # primary key in the response.
+        new_order['id'] = id
 
-    # Return the dictionary with `id` property added
-    return order
+    return new_order
+
+    # # Get the id value of the last order in the list
+    # max_id = ORDERS[-1]["id"]
+
+    # # Add 1 to whatever that number is
+    # new_id = max_id + 1
+
+    # # Add an `id` property to the order dictionary
+    # order["id"] = new_id
+
+    # # Add the order dictionary to the list
+    # ORDERS.append(order)
+
+    # # Return the dictionary with `id` property added
+    # return order
 
 
 def delete_order(id):

@@ -1,6 +1,10 @@
-from .metals_requests import get_single_metal
-from .sizes_requests import get_single_size
-from .styles_requests import get_single_style
+import sqlite3
+import json
+from models import Order, Metal, Size, Style
+
+# from .metals_requests import get_single_metal
+# from .sizes_requests import get_single_size
+# from .styles_requests import get_single_style
 
 ORDERS = [
     {
@@ -16,7 +20,59 @@ ORDERS = [
 
 def get_all_orders():
     """Handles Server request for all ORDERS"""
-    return ORDERS
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+
+        # Just use these. It's a Black Box.
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Write the SQL query to get the information you want
+        db_cursor.execute("""
+        SELECT
+            o.id,
+            o.metal_id,
+            o.size_id,
+            o.style_id,
+            o.jewelry_id,
+            o.timestamp,
+            m.metal metal_name,
+            m.price metal_price,
+            sz.carets size_carets,
+            sz.price size_price,
+            st.style style_name,
+            st.price style_price
+        FROM Orders o
+        JOIN Metals m
+            ON m.id = o.metal_id
+        JOIN Sizes sz
+            ON sz.id = o.size_id
+        JOIN Styles st
+            ON st.id = o.style_id
+        """)
+
+        orders = []
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+
+            order = Order(row['id'], row['metal_id'], row['size_id'],
+                          row['style_id'], row['jewelry_id'], row['timestamp'])
+
+            metal = Metal(
+                row['location_id'], row['metal_name'], row['metal_price'])
+            size = Size(
+                row['size_id'], row['size_carets'], row['size_price'])
+            style = Style(
+                row['style_id'], row['style_name'], row['style_price'])
+
+            order.metal = metal.__dict__
+            order.size = size.__dict__
+            order.style = style.__dict__
+
+            orders.append(order.__dict__)
+
+    return orders
 
 
 def get_single_order(id):

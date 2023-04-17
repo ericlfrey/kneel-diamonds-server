@@ -2,6 +2,7 @@ import json
 from urllib.parse import urlparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from repository import (get_all, retrieve, update, create, get_single_order)
+from views import get_all_orders
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -36,7 +37,10 @@ class HandleRequests(BaseHTTPRequestHandler):
             else:
                 response = retrieve(resource, id)
         else:
-            response = get_all(resource)
+            if resource == "orders":
+                response = get_all_orders()
+            else:
+                response = get_all(resource)
         if response is not None:
             self._set_headers(200)
         else:

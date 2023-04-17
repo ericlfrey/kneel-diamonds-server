@@ -1,8 +1,8 @@
 import json
 from urllib.parse import urlparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from repository import (get_all, retrieve, update, create, get_single_order)
-from views import get_all_orders
+from repository import (get_all, retrieve, update, create)
+from views import get_all_orders, get_single_order
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -33,7 +33,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         """Tests whether to get All items, or get Single item"""
         if id is not None:
             if resource == "orders":
-                response = get_single_order(id, query_params)
+                response = get_single_order(id)
             else:
                 response = retrieve(resource, id)
         else:

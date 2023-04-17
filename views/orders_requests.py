@@ -77,6 +77,31 @@ def get_all_orders():
 
 def get_single_order(id):
     """gets a single order"""
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        SELECT
+            o.id,
+            o.metal_id,
+            o.size_id,
+            o.style_id,
+            o.jewelry_id,
+            o.timestamp
+        FROM orders o
+        WHERE o.id = ?
+        """, (id, ))
+
+        # Load the single result into memory
+        data = db_cursor.fetchone()
+
+        # Create an animal instance from the current row
+        order = Order(data['id'], data['metal_id'], data['size_id'],
+                      data['style_id'], data['jewelry_id'], data['timestamp']
+                      )
+
+        return order.__dict__
     # requested_order = None
 
     # for order in ORDERS:

@@ -127,10 +127,10 @@
 #         # Add a new order to the list. Don't worry about
 #         # the orange squiggle, you'll define the create_order
 #         # function next.
-#         if resource == "orders":
-#             orders_list = ["metal_id", "size_id",
-#                            "style_id", "jewelry_id", "timestamp"]
-#             if all(orders_list_item in post_body for orders_list_item in orders_list):
+# if resource == "orders":
+#     orders_list = ["metal_id", "size_id",
+#                    "style_id", "jewelry_id", "timestamp"]
+#     if all(orders_list_item in post_body for orders_list_item in orders_list):
 #                 self._set_headers(201)
 #                 new_order = create_order(post_body)
 #             else:

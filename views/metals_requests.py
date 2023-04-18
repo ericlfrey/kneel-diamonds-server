@@ -1,3 +1,6 @@
+import sqlite3
+import json
+
 METALS = [
     {
         "id": 1,
@@ -85,10 +88,31 @@ def delete_metal(id):
 
 def update_metal(id, new_metal):
     """Updates metal with Replacement"""
+    with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        UPDATE Metals
+            SET
+                metal = ?,
+                price = ?
+        WHERE id = ?
+        """, (new_metal['metal'], new_metal['price'], id, ))
+
+        # Were any rows affected?
+        # Did the client send an `id` that exists?
+        rows_affected = db_cursor.rowcount
+
+    if rows_affected == 0:
+        # Forces 404 response by main module
+        return False
+    else:
+        # Forces 204 response by main module
+        return True
     # Iterate the METALS list, but use enumerate() so that
     # you can access the index value of each item.
-    for index, metal in enumerate(METALS):
-        if metal["id"] == id:
-            # Found the metal. Update the value.
-            METALS[index] = new_metal
-            break
+    # for index, metal in enumerate(METALS):
+    #     if metal["id"] == id:
+    #         # Found the metal. Update the value.
+    #         METALS[index] = new_metal
+    #         break

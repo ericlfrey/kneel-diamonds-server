@@ -2,7 +2,7 @@ import json
 from urllib.parse import urlparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from repository import (get_all, retrieve, update)
-from views import get_all_orders, get_single_order, create_order, delete_order
+from views import get_all_orders, get_single_order, create_order, delete_order, update_metal
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -95,22 +95,33 @@ class HandleRequests(BaseHTTPRequestHandler):
         post_body = json.loads(post_body)
         (resource, id, query_params) = self.parse_url(self.path)
 
+        success = False
+
         if resource == "metals":
-            metal_dict = retrieve(resource, id)
-            if post_body["metal"] == metal_dict["metal"]:
-                self._set_headers(204)
-                update(id, post_body, resource)
-                self.wfile.write("".encode())
-            else:
-                self._set_headers(405)
-                error_message = {"message": "Only price can be updated."}
-                self.wfile.write(json.dumps(error_message).encode())
+            success = update_metal(id, post_body)
+
+        if success:
+            self._set_headers(204)
         else:
-            self._set_headers(405)
-            error_message = {
-                "message": "That function is not allowed."
-            }
-            self.wfile.write(json.dumps(error_message).encode())
+            self._set_headers(404)
+
+        self.wfile.write("".encode())
+
+        # metal_dict = retrieve(resource, id)
+        # if post_body["metal"] == metal_dict["metal"]:
+        #     self._set_headers(204)
+        #     update(id, post_body, resource)
+        #     self.wfile.write("".encode())
+        # else:
+        #     self._set_headers(405)
+        #     error_message = {"message": "Only price can be updated."}
+        #     self.wfile.write(json.dumps(error_message).encode())
+        # else:
+        #     self._set_headers(405)
+        #     error_message = {
+        #         "message": "That function is not allowed."
+        #     }
+        #     self.wfile.write(json.dumps(error_message).encode())
 
     def do_DELETE(self):
         """Handles DELETE requests to server"""

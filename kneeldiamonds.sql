@@ -83,3 +83,5 @@ SELECT
             ON sz.id = o.size_id
         JOIN Styles st
             ON st.id = o.style_id
+
+            

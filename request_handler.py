@@ -2,7 +2,16 @@ import json
 from urllib.parse import urlparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from repository import (get_all, retrieve, update)
-from views import get_all_orders, get_single_order, create_order, delete_order, update_metal
+from views import (
+    get_all_orders,
+    get_all_metals,
+    get_all_sizes,
+    get_all_styles,
+    get_single_order,
+    create_order,
+    delete_order
+    # update_metal
+)
 
 
 class HandleRequests(BaseHTTPRequestHandler):
@@ -12,20 +21,21 @@ class HandleRequests(BaseHTTPRequestHandler):
     def parse_url(self, path):
         """This function splits the client path string into parts to isolate the requested id"""
         url_components = urlparse(path)
-        print(f"URL {url_components}")
         path_params = url_components.path.strip("/").split("/")
-        print(f"PATH {path_params}")
-        query_params = url_components.query.split("&")
-        print(f"QUERY {query_params}")
+        query_params = []
+
+        if url_components.query != '':
+            query_params = url_components.query.split("&")
+
         resource = path_params[0]
         id = None
 
         try:
             id = int(path_params[1])
         except IndexError:
-            pass
+            pass  # No route parameter exists: /animals
         except ValueError:
-            pass
+            pass  # Request had trailing slash: /animals/
 
         return (resource, id, query_params)
 
@@ -39,8 +49,14 @@ class HandleRequests(BaseHTTPRequestHandler):
         else:
             if resource == "orders":
                 response = get_all_orders()
-            else:
-                response = get_all(resource)
+            if resource == "metals":
+                response = get_all_metals(query_params)
+            if resource == "styles":
+                response = get_all_styles()
+            if resource == "sizes":
+                response = get_all_sizes()
+            # else:
+            #     response = get_all(resource)
         if response is not None:
             self._set_headers(200)
         else:
@@ -55,87 +71,87 @@ class HandleRequests(BaseHTTPRequestHandler):
         response = self.get_all_or_single(resource, id, query_params)
         self.wfile.write(json.dumps(response).encode())
 
-    def do_POST(self):
-        """Handles POST requests to the server """
-        content_len = int(self.headers.get('content-length', 0))
-        post_body = self.rfile.read(content_len)
-        post_body = json.loads(post_body)
-        (resource, id, query_params) = self.parse_url(self.path)
-        new_order = None
+    # def do_POST(self):
+    #     """Handles POST requests to the server """
+    #     content_len = int(self.headers.get('content-length', 0))
+    #     post_body = self.rfile.read(content_len)
+    #     post_body = json.loads(post_body)
+    #     (resource, id, query_params) = self.parse_url(self.path)
+    #     new_order = None
 
-        if resource == "orders":
-            orders_list = (["metal_id",
-                            "size_id",
-                            "style_id",
-                            "jewelry_id",
-                            "timestamp"])
-            if all(orders_list_item in post_body for orders_list_item in orders_list):
-                self._set_headers(201)
-                new_order = create_order(post_body)
-            else:
-                self._set_headers(400)
-                key_list = [
-                    key_item for key_item in orders_list if key_item not in post_body]
-                key_string = ', '.join([str(item) for item in key_list])
-                new_order = {
-                    "message": f"{key_string} is required"
-                }
-            self.wfile.write(json.dumps(new_order).encode())
-        else:
-            self._set_headers(405)
-            error_message = {
-                "message": "That function is not allowed."
-            }
-            self.wfile.write(json.dumps(error_message).encode())
+    #     if resource == "orders":
+    #         orders_list = (["metal_id",
+    #                         "size_id",
+    #                         "style_id",
+    #                         "jewelry_id",
+    #                         "timestamp"])
+    #         if all(orders_list_item in post_body for orders_list_item in orders_list):
+    #             self._set_headers(201)
+    #             new_order = create_order(post_body)
+    #         else:
+    #             self._set_headers(400)
+    #             key_list = [
+    #                 key_item for key_item in orders_list if key_item not in post_body]
+    #             key_string = ', '.join([str(item) for item in key_list])
+    #             new_order = {
+    #                 "message": f"{key_string} is required"
+    #             }
+    #         self.wfile.write(json.dumps(new_order).encode())
+    #     else:
+    #         self._set_headers(405)
+    #         error_message = {
+    #             "message": "That function is not allowed."
+    #         }
+    #         self.wfile.write(json.dumps(error_message).encode())
 
-    def do_PUT(self):
-        """Handles PUT requests to the server """
-        content_len = int(self.headers.get('content-length', 0))
-        post_body = self.rfile.read(content_len)
-        post_body = json.loads(post_body)
-        (resource, id, query_params) = self.parse_url(self.path)
+    # def do_PUT(self):
+    #     """Handles PUT requests to the server """
+    #     content_len = int(self.headers.get('content-length', 0))
+    #     post_body = self.rfile.read(content_len)
+    #     post_body = json.loads(post_body)
+    #     (resource, id, query_params) = self.parse_url(self.path)
 
-        success = False
+    #     success = False
 
-        if resource == "metals":
-            success = update_metal(id, post_body)
+    #     if resource == "metals":
+    #         success = update_metal(id, post_body)
 
-        if success:
-            self._set_headers(204)
-        else:
-            self._set_headers(404)
+    #     if success:
+    #         self._set_headers(204)
+    #     else:
+    #         self._set_headers(404)
 
-        self.wfile.write("".encode())
+    #     self.wfile.write("".encode())
 
-        # metal_dict = retrieve(resource, id)
-        # if post_body["metal"] == metal_dict["metal"]:
-        #     self._set_headers(204)
-        #     update(id, post_body, resource)
-        #     self.wfile.write("".encode())
-        # else:
-        #     self._set_headers(405)
-        #     error_message = {"message": "Only price can be updated."}
-        #     self.wfile.write(json.dumps(error_message).encode())
-        # else:
-        #     self._set_headers(405)
-        #     error_message = {
-        #         "message": "That function is not allowed."
-        #     }
-        #     self.wfile.write(json.dumps(error_message).encode())
+    #     # metal_dict = retrieve(resource, id)
+    #     # if post_body["metal"] == metal_dict["metal"]:
+    #     #     self._set_headers(204)
+    #     #     update(id, post_body, resource)
+    #     #     self.wfile.write("".encode())
+    #     # else:
+    #     #     self._set_headers(405)
+    #     #     error_message = {"message": "Only price can be updated."}
+    #     #     self.wfile.write(json.dumps(error_message).encode())
+    #     # else:
+    #     #     self._set_headers(405)
+    #     #     error_message = {
+    #     #         "message": "That function is not allowed."
+    #     #     }
+    #     #     self.wfile.write(json.dumps(error_message).encode())
 
-    def do_DELETE(self):
-        """Handles DELETE requests to server"""
-        (resource, id, query_params) = self.parse_url(self.path)
-        if resource == "orders":
-            self._set_headers(204)
-            delete_order(id)
-            self.wfile.write("".encode())
-        else:
-            self._set_headers(405)
-            error_message = {
-                "message": f"Deleting {resource.lower()} requires contacting the company directly."
-            }
-            self.wfile.write(json.dumps(error_message).encode())
+    # def do_DELETE(self):
+    #     """Handles DELETE requests to server"""
+    #     (resource, id, query_params) = self.parse_url(self.path)
+    #     if resource == "orders":
+    #         self._set_headers(204)
+    #         delete_order(id)
+    #         self.wfile.write("".encode())
+    #     else:
+    #         self._set_headers(405)
+    #         error_message = {
+    #             "message": f"Deleting {resource.lower()} requires contacting the company directly."
+    #         }
+    #         self.wfile.write(json.dumps(error_message).encode())
 
     def _set_headers(self, status):
         """Sets the status code, Content-Type and Access-Control-Allow-Origin

@@ -84,4 +84,9 @@ SELECT
         JOIN Styles st
             ON st.id = o.style_id
 
-            
+SELECT
+            m.id,
+            m.metal,
+            m.price
+        FROM metals m
+        ORDER BY price

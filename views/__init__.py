@@ -7,10 +7,10 @@ from .orders_requests import (
 )
 from .metals_requests import (
     get_all_metals,
-    get_single_metal,
-    create_metal,
-    delete_metal,
-    update_metal
+    # get_single_metal,
+    # create_metal,
+    # delete_metal,
+    # update_metal
 )
 from .sizes_requests import (
     get_all_sizes,
